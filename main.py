@@ -59,10 +59,10 @@ def run():
     # search total of pages
     soup   =  BeautifulSoup(html, 'html.parser')
     elem   =  soup.find('div', {
-        'class': 'pagination pagination text-center'
+        'class': constants.PAGINATION
     }).find('ul').findAll('li')[-1].find('a')
     # parse num of pages
-    r = re.compile("_materia_WAR_atividadeportlet_p=")
+    r = re.compile(constants.PAGES + '=')
     data = elem["href"].split("&")
     num_pages =  str(filter(r.match, data)[0].split("=")[1])
         
@@ -71,7 +71,7 @@ def run():
         try:
             html = utils.request_page(i)
             soup = BeautifulSoup(html, 'html.parser') 
-            table =  soup.find('div', {'class': 'div-zebra'})    
+            table =  soup.find('div', {'class': constants.TABLE_DIV})    
             divs  =  table.findAll('div')  
             info = []        
             for data in divs:               
