@@ -10,7 +10,7 @@ class Utils:
     
     def __init__(self):
         self.config = {}        
-        self.connection = {}
+        self.conn = {}
         
     def load_config(self):
         '''
@@ -22,7 +22,10 @@ class Utils:
         self.constants = constants
         
     def get_config(self):
-       
+        '''
+            get search params in config
+            @return params (string)
+        '''       
         params = 'data'       
         search = self.config["DEFAULT"]
         for v in search.values():
@@ -49,14 +52,18 @@ class Utils:
             raise ValueError(str(response.status_code))
         
     def connect_database(self):
+        '''
+            connect to mongodb
+            @return db object
+        '''
         db_conf = self.config["DATABASE"]
         conn_str = 'mongodb://{0}:{1}@{2}:{3}/{4}'.format(db_conf["user"],
                                                           db_conf["password"],
                                                           db_conf["host"],
                                                           db_conf["port"],
                                                           db_conf["dbname"])
-        dbCon = pymongo.MongoClient(conn_str)
-        return dbCon[db_conf["dbname"]]    
+        self.conn = pymongo.MongoClient(conn_str)
+        return self.conn[db_conf["dbname"]]    
 
 
 def run():       
@@ -81,9 +88,8 @@ def run():
         db = utils.connect_database()
     except Exception as e:
         print('error on db connection {}'.format(str(e)))
-        return
+        return    
     
-    # search total of pages
     soup   =  BeautifulSoup(html, 'html.parser')
     # check data not available
     not_avail = soup.find('div', {'class':constants.NOT_AVAILABLE[0]})
@@ -93,7 +99,7 @@ def run():
         print('error: data is not available')
         return
         
-    
+    # search total of pages
     elem   =  soup.find('div', {
         'class': constants.PAGINATION
     }).find('ul').findAll('li')[-1].find('a')
@@ -126,7 +132,8 @@ def run():
         
     try:
         collection = utils.get_config()
-        db[collection].update_many( results ,{'$set': results },upsert=True)
+        for data in results:
+            db[collection].update_one(data,{'$set': data},upsert=True)
     except Exception as e:
         print('error inserting data: {}'.format(str(e)))  
 
