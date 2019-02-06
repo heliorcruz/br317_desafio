@@ -10,4 +10,7 @@ FILTER =  {
 }
 PAGINATION = 'pagination pagination text-center'
 TABLE_DIV = 'div-zebra'
+NOT_AVAILABLE = ['portlet-body',
+                 'alert alert-error',
+                 'Pesquisa e Detalhe de Mat\xe9ria est\xe1 temporariamente indispon\xedvel.']
  
