@@ -133,6 +133,8 @@ def run():
     
 if __name__ == '__main__':
     try:
+        print('started script')
         run()
+        print('finished script')
     except Exception as e:
         print('error processing -- {}'.format(str(e)))
