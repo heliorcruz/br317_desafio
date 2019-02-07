@@ -29,7 +29,7 @@ class Utils:
         params = 'data'       
         search = self.config["DEFAULT"]
         for v in search.values():
-            params += '_{}'.format(v) if v is not None else ''
+            params += '_{}'.format(v) if v else ''
         return params             
        
         
@@ -106,10 +106,10 @@ def run():
     # parse num of pages
     r = re.compile(constants.PAGES + '=')
     data = elem["href"].split("&")
-    num_pages =  str(filter(r.match, data)[0].split("=")[1])
+    num_pages =  str(list(filter(r.match, data))[0].split("=")[1])
         
     results = []    
-    for i in range(int(num_pages)):       
+    for i in range(1,int(num_pages)):       
         try:
             html = utils.request_page(i)
             soup = BeautifulSoup(html, 'html.parser') 
@@ -119,23 +119,36 @@ def run():
             for data in divs:               
                 info = data.find('dl').findAll('dd')               
                 obj = {}
-                obj["materia"] = info[0].find('a').find("span").text
+                obj["materia"] = info[0].find('a').text
                 obj["link"] = info[0].find('a')["href"]
-                obj["ementa"] = info[1].text.encode("utf-8")
-                obj["autor"] = info[2].text.encode("utf-8")
-                obj["data"]  = info[3].text.encode("utf-8")
-                print("{} - {}".format(str(i+1),obj))
+                obj["ementa"] = info[1].text
+                obj["autor"] = info[2].text
+                obj["data"]  = info[3].text
+                print(" -- reading from page: {} - {}".format(str(i),obj))
                 results.append(obj)
-        except:            
+        except Exception as e:            
             print('error processing page: {} -- {}'.format(str(i), str(e)))
             continue 
-        
+    
+    insert_count = 0
+    update_count = 0
     try:
-        collection = utils.get_config()
+        collection = utils.get_config()        
         for data in results:
-            db[collection].update_one(data,{'$set': data},upsert=True)
+            # try to update existing or insert new data 
+            ret = db[collection].update_one(data,{'$set': data},upsert=True)
+            print(""" -- inserting in database: matched_count:{}, modified_count:{}, upserted_id:{} 
+                  """.format(ret.matched_count,ret.modified_count, ret.upserted_id))
+            if ret.matched_count == 0: 
+                insert_count += 1
+            if ret.modified_count == 1:
+                update_count += 1
+                
     except Exception as e:
-        print('error inserting data: {}'.format(str(e)))  
+        print('error inserting data: {}'.format(str(e))) 
+        
+    print("total inserted: {}".format(insert_count)) 
+    print("total updated: {}".format(update_count)) 
 
     
 if __name__ == '__main__':
