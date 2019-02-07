@@ -22,11 +22,11 @@ Configurar parametros de busca no arquivo config.ini:
 
 ```
   
-O arquivo 'config.json' possui os tipos disponiveis para o 'type' no campo TYPES, o exemplo acima esta usando  
+O arquivo 'config.json' possui os exemplos dos tipos mais usados disponiveis para o 'type' no campo TYPES, o exemplo acima esta usando  
 "PLS" : "PROJETO DE LEI DO SENADO" e ano "2018"  
   
 A configuração de database é feita em [DATABASE] do arquivo config.ini  
   
-Executar p script  
+Executar python script  
 `python main.py`  
 
